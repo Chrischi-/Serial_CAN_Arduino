@@ -43,6 +43,9 @@ public:
     
     unsigned char setMask(unsigned long *dta);
     unsigned char setFilt(unsigned long *dta);
+    
+    unsigned char factorySetting();
+    void debugMode();
 
 };
 #endif

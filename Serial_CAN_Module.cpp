@@ -86,15 +86,11 @@ unsigned char Serial_CAN::cmdOk(char *cmd)
     unsigned long timer_s = millis();
     unsigned char len = 0;
 
-    //Serial.println("cmdOk - what cmd");
     canSerial->println(cmd);
-    //Serial.println(cmd);
-    //Serial.println("cmdOk - what get");
     while(1)
     {
         if(millis()-timer_s > 500)
         {
-            //Serial.println("cmdOk - timeout");
             return 0;
         }
         
@@ -102,15 +98,9 @@ unsigned char Serial_CAN::cmdOk(char *cmd)
         {
 
             str_tmp[len++] = canSerial->read();
-            //Serial.write(str_tmp[len-1]);
             timer_s = millis();
         }
-        
-        /*if(len == 4 && str_tmp[0] == 'O' && str_tmp[1] == 'K')
-        {
-            return 1;        
-        }*/
-        
+
         if(len >= 4 && str_tmp[len-1] == '\n' && str_tmp[len-2] == '\r' && str_tmp[len-3] == 'K' && str_tmp[len-4] == 'O')
         {
             clear();
@@ -274,6 +264,81 @@ unsigned char Serial_CAN::setFilt(unsigned long *dta)
     }
     exitSettingMode();
     return 1;
+}
+
+/*
+value	        0	    1	    2	    3   	4
+baud rate(b/s)	9600	19200	38400	57600	115200
+*/
+unsigned char Serial_CAN::factorySetting()
+{
+    // check baudrate
+    unsigned long baud[5] = {9600, 19200, 38400, 57600, 115200};
+    
+    for(int i=0; i<5; i++)
+    {
+        canSerial->begin(baud[i]);
+        canSerial->print("+++");
+        delay(100);
+        
+        if(cmdOk("AT\r\n"))
+        {
+            Serial.print("SERIAL BAUD RATE IS: ");
+            Serial.println(baud[i]);
+            baudRate(0);                // set serial baudrate to 9600
+            Serial.println("SET SERIAL BAUD RATE TO: 9600 OK");
+            canSerial->begin(9600);
+            break;            
+        }
+    }
+    
+    if(canRate(CAN_RATE_500))
+    {
+        Serial.println("SET CAN BUS BAUD RATE TO 500Kb/s OK");
+    }
+    else
+    {
+        Serial.println("SET CAN BUS BAUD RATE TO 500Kb/s FAIL");
+        return 0;
+    }
+    
+    unsigned long mask[4] = {0, 0, 0, 0,};
+    unsigned long filt[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+    
+    if(setFilt(filt))
+    {
+        Serial.println("FACTORY SETTING FILTS OK");
+    }
+    else 
+    {
+        Serial.println("FACTORY SETTING FILTS FAIL");
+        return 0;        
+    }
+    
+    if(setMask(mask))
+    {
+        Serial.println("FACTORY SETTING MASKS OK");
+    }
+    else
+    {
+        Serial.println("FACTORY SETTING MASKS FAIL");
+        return 0;
+    }
+    
+    return 1;
+}
+
+void Serial_CAN::debugMode()
+{
+    while(Serial.available())
+    {
+        canSerial->write(Serial.read());
+    }
+    
+    while(canSerial->available())
+    {
+        Serial.write(canSerial->read());
+    }
 }
 
 // END FILE

@@ -18,6 +18,7 @@
    #define CAN_RATE_500    16
    #define CAN_RATE_666    17
    #define CAN_RATE_1000   18
+   SUPPORT: joney.sui@longan-labs.cc
 */
 
 #include <Serial_CAN_Module.h>
@@ -25,8 +26,8 @@
 
 Serial_CAN can;
 
-#define can_tx  3           // tx of serial can module connect to D3
-#define can_rx  2           // rx of serial can module connect to D2
+#define can_tx  2           // tx of serial can module connect to D3
+#define can_rx  3           // rx of serial can module connect to D2
 
 void setup()
 {

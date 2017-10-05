@@ -1,28 +1,21 @@
-// debug mode 
+// debug mode
+#include <Serial_CAN_Module.h>
 #include <SoftwareSerial.h>
 
-#define RX  3
-#define TX  2
+Serial_CAN can;
 
-SoftwareSerial can(RX, TX);
+#define can_tx  2           // tx of serial can module connect to D2
+#define can_rx  3           // rx of serial can module connect to D3
 
 void setup()
 {
     Serial.begin(9600);
-    can.begin(9600);
+    can.begin(can_tx, can_rx, 9600);      // tx, rx
 }
 
 void loop()
 {
-    while(Serial.available())
-    {
-        can.write(Serial.read());
-    }
-    
-    while(can.available())
-    {
-        Serial.write(can.read());
-    }
+    can.debugMode();
 }
 
 // END FILE
